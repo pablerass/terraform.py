@@ -395,7 +395,7 @@ def aws_host(resource, module_name):
                                              'vpc_security_group_ids'),
         # ansible-specific
         'ansible_ssh_port': 22,
-        'ansible_ssh_host': raw_attrs['public_ip'],
+        'ansible_ssh_host': raw_attrs['private_ip'],
         # generic
         'public_ipv4': raw_attrs['public_ip'],
         'private_ipv4': raw_attrs['private_ip'],
@@ -403,10 +403,14 @@ def aws_host(resource, module_name):
     }
 
     # attrs specific to Ansible
-    if 'tags.sshUser' in raw_attrs:
-        attrs['ansible_ssh_user'] = raw_attrs['tags.sshUser']
-    if 'tags.sshPrivateIp' in raw_attrs:
-        attrs['ansible_ssh_host'] = raw_attrs['private_ip']
+    # TODO: Set camelcase Ansible starting to its corresponding ansible_
+    # variables
+    if 'tags.AnsibleSshUser' in raw_attrs:
+        attrs['ansible_ssh_user'] = raw_attrs['tags.AnsibleSshUser']
+    if 'tags.AnsibleSshPublicIp' in raw_attrs:
+        attrs['ansible_ssh_host'] = raw_attrs['public_ip']
+    if 'tags.AnsiblePythonInterpreter' in raw_attrs:
+        attrs['ansible_python_interpreter'] = raw_attrs['tags.AnsiblePythonInterpreter']
 
     # attrs specific to Mantl
     attrs.update({

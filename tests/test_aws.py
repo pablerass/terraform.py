@@ -38,8 +38,8 @@ def aws_resource():
                 "root_block_device.0.volume_type": "gp2", "security_groups.#":
                 "0", "subnet_id": "subnet-1155c03a", "tags.#": "4",
                 "tags.Name": "mi-control-01", "tags.dc": "aws", "tags.role":
-                "control", "tags.sshUser": "ec2-user", "tenancy": "default",
-                "vpc_security_group_ids.#": "2",
+                "control", "tags.AnsibleSshUser": "ec2-user",
+                "tenancy": "default", "vpc_security_group_ids.#": "2",
                 "vpc_security_group_ids.1636704399": "sg-9c360cf8",
                 "vpc_security_group_ids.3543019159": "sg-9d360cf9"
             }, "meta": {"schema_version": "1"}
@@ -80,13 +80,13 @@ def test_name(aws_resource, aws_host):
     'security_groups': [],
     'subnet': {'id': 'subnet-1155c03a'},
     'tags': {
-        'sshUser': 'ec2-user', 'role': 'control', 'dc': 'aws', 'Name':
+        'AnsibleSshUser': 'ec2-user', 'role': 'control', 'dc': 'aws', 'Name':
         'mi-control-01'
     },
     'tenancy': 'default',
     'vpc_security_group_ids': ['sg-9c360cf8', 'sg-9d360cf9'],
     # ansible
-    'ansible_ssh_host': '52.7.74.115',
+    'ansible_ssh_host': '10.0.152.191',
     'ansible_ssh_port': 22,
     'ansible_ssh_user': 'ec2-user',
     # mi
@@ -105,7 +105,8 @@ def test_attrs(aws_resource, aws_host, attr, should):
 @pytest.mark.parametrize(
     'group',
     ['aws_ami=ami-fe100a96', 'aws_az=us-east-1e', 'aws_key_name=key-mi',
-     'aws_tenancy=default', 'aws_tag_sshUser=ec2-user', 'aws_tag_role=control',
+     'aws_tenancy=default', 'aws_tag_AnsibleSshUser=ec2-user',
+     'aws_tag_role=control',
      'aws_tag_dc=aws', 'aws_tag_Name=mi-control-01',
      'aws_vpc_security_group=sg-9c360cf8',
      'aws_vpc_security_group=sg-9d360cf9', 'aws_subnet_id=subnet-1155c03a',
