@@ -30,6 +30,13 @@ import re
 import six
 import subprocess
 
+from subprocess import Popen, PIPE, STDOUT
+
+try:
+    from subprocess import DEVNULL # Python 3.x
+except ImportError:
+    DEVNULL = open(os.devnull, 'wb')
+
 VERSION = '0.3.0pre'
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -53,7 +60,8 @@ def get_source(source):
     elif not os.path.isdir(CACHE_DIR):
         raise ValueError('%r exists and not a directory.' % CACHE_DIR)
 
-    subprocess.check_call(['aws', 's3', 'sync', source, CACHE_DIR])
+    subprocess.check_call(['aws', 's3', 'sync', source, CACHE_DIR],
+                          stdout=DEVNULL, stderr=DEVNULL)
 
 
 def tfstates(root=None):
