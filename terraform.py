@@ -21,11 +21,39 @@ from __future__ import unicode_literals, print_function
 import argparse
 from collections import defaultdict
 from functools import wraps
+
+import boto3
+import configparser
 import json
 import os
 import re
+import six
+import subprocess
 
 VERSION = '0.3.0pre'
+
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+CONF_FILE = os.path.join(BASE_DIR, os.path.basename(__file__).replace('py', 'ini'))
+CACHE_DIR = os.path.join(BASE_DIR, '.cache')
+
+
+def load_conf():
+    if six.PY3:
+        config = configparser.ConfigParser()
+    else:
+        config = configparser.SafeConfigParser()
+
+    config.read(CONF_FILE)
+    return config
+
+
+def get_source(source):
+    if not os.path.exists(CACHE_DIR):
+        os.mkdir(CACHE_DIR)
+    elif not os.path.isdir(CACHE_DIR):
+        raise ValueError('%r exists and not a directory.' % CACHE_DIR)
+
+    subprocess.check_call(['aws', 's3', 'sync', source, CACHE_DIR])
 
 
 def tfstates(root=None):
@@ -715,6 +743,8 @@ def query_hostfile(hosts):
 
 
 def main():
+    config = load_conf()
+
     parser = argparse.ArgumentParser(
         __file__, __doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter, )
@@ -735,6 +765,11 @@ def main():
     parser.add_argument('--nometa',
                         action='store_true',
                         help='with --list, exclude hostvars')
+    default_source = os.environ.get('TERRAFORM_STATE_SOURCE', None)
+    if config.has_option('default', 'source'):
+        default_source = config.get('default', 'source')
+    parser.add_argument('--source', type=str, default=default_source,
+                        help='with --list, exclude hostvars')
     default_root = os.environ.get('TERRAFORM_STATE_ROOT',
                                   os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                                '..', '..', )))
@@ -747,6 +782,10 @@ def main():
     if args.version:
         print('%s %s' % (__file__, VERSION))
         parser.exit()
+
+    if args.source:
+        get_source(args.source)
+        args.root = CACHE_DIR
 
     hosts = iterhosts(iterresources(tfstates(args.root)))
     if args.list:
