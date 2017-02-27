@@ -451,8 +451,7 @@ def aws_host(resource, module_name):
     # attrs specific to Mantl
     attrs.update({
         'consul_dc': _clean_dc(attrs['tags'].get('dc', module_name)),
-        'role': attrs['tags'].get('role', 'none'),
-        'ansible_python_interpreter': attrs['tags'].get('python_bin','python')
+        'role': attrs['tags'].get('role', 'none')
     })
 
     # groups specific to Mantl
